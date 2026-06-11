@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PetShop - Love Pet</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700;800&display=swap" rel="stylesheet" />
+
+<style>
+.font-poppins { font-family: 'Poppins', sans-serif; }
+.bg-heart { background-color: #FF4B4B; }
+.text-heart { color: #FF4B4B; }
+.border-heart { border-color: #FF4B4B; }
+.hover-heart:hover { background-color: #FF3333; }
+
+/* Menu Sanduíche */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: -280px;
+  width: 280px;
+  height: 100%;
+  background-color: #FF4B4B;
+  color: white;
+  transition: left 0.3s ease;
+  z-index: 1000;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+  overflow-y: auto;
+}
+
+.sidebar.open {
+  left: 0;
+}
+
+.sidebar-header {
+  padding: 20px;
+  text-align: center;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+  margin-bottom: 20px;
+}
+
+.sidebar-header .logo {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin: 0 auto 10px;
+  border: 3px solid white;
+}
+
+.sidebar-header .logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sidebar-header h2 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.5rem;
+  margin: 10px 0 0;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 20px;
+}
+
+.sidebar-nav button {
+  background: rgba(255,255,255,0.1);
+  border: none;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 1rem;
+  text-align: left;
+  transition: all 0.3s ease;
+}
+
+.sidebar-nav button:hover {
+  background: rgba(255,255,255,0.2);
+  transform: translateX(5px);
+}
+
+/* Overlay */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 999;
+  display: none;
+}
+
+.overlay.active {
+  display: block;
+}
+
+/* Botão Menu */
+.menu-btn {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  background: #FF4B4B;
+  color: white;
+  border: none;
+  width: 45px;
+  height: 45px;
+  border-radius: 10px;
+  cursor: pointer;
+  z-index: 1001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+.menu-btn:hover {
+  background: #FF3333;
+  transform: scale(1.05);
+}
+
+/* Ajuste do header */
+header {
+  padding-left: 80px;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    width: 260px;
+    left: -260px;
+  }
+  
+  header {
+    padding-left: 70px;
+  }
+  
+  header h1 {
+    font-size: 1.8rem;
+  }
+  
+  .menu-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+}
+
+.loading {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+}
+
+.error-message {
+  background-color: #fee;
+  border: 1px solid #fcc;
+  color: #c33;
+  padding: 10px;
+  border-radius: 5px;
+  margin: 10px 0;
+}
+
+.no-data {
+  text-align: center;
+  padding: 40px;
+  color: #999;
+  background: #f9f9f9;
+  border-radius: 10px;
+}
+</style>
+
+</head>
+<body class="bg-white">
+
+<button class="menu-btn" onclick="toggleSidebar()">☰</button>
+
+<div id="sidebar" class="sidebar">
+  <div class="sidebar-header">
+    <div class="logo">
+      <img src="https://i.pinimg.com/1200x/53/a7/2a/53a72a40a84a32547868f66214908c0c.jpg" alt="Logo">
+    </div>
+    <h2>Love Pet</h2>
+    <p class="text-sm opacity-80">🐾 Seu pet merece amor</p>
+  </div>
+  
+  <div class="sidebar-nav">
+    <button onclick="abrirHome(); closeSidebar()">🏠 Início</button>
+    <button onclick="abrirProdutos(); closeSidebar()">🛍️ Produtos</button>
+    <button onclick="abrirCategorias(); closeSidebar()">📁 Categorias</button>
+  </div>
+</div>
+
+<div id="overlay" class="overlay" onclick="closeSidebar()"></div>
+
+<header class="flex flex-col items-center p-4 border-b bg-heart shadow-md space-y-4">
+  <div class="w-32 h-32 bg-white rounded-full overflow-hidden border-4 border-white">
+    <img src="https://i.pinimg.com/1200x/53/a7/2a/53a72a40a84a32547868f66214908c0c.jpg" class="object-cover w-full h-full" alt="Logo"/>
+  </div>
+  <h1 class="text-4xl font-poppins font-bold text-white">Love Pet</h1>
+  <nav class="flex gap-6 max-md:hidden">
+    <button onclick="abrirHome()" class="text-white hover:opacity-80 transition">Início</button>
+    <button onclick="abrirProdutos()" class="text-white hover:opacity-80 transition">Produtos</button>
+    <button onclick="abrirCategorias()" class="text-white hover:opacity-80 transition">Categorias</button>
+  </nav>
+</header>
+
+<main class="p-6">
+<div id="home">
+  <h2 class="text-2xl font-bold">Bem-vindo 🐾</h2>
+  <p class="text-gray-600 mt-2">Aqui você encontra tudo para o seu pet com muito amor e carinho!</p>
+  <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="bg-pink-50 p-4 rounded-lg text-center"><div class="text-4xl">🐶</div><h3 class="font-bold mt-2">Produtos de Qualidade</h3><p class="text-sm text-gray-600">Os melhores produtos para seu amigo</p></div>
+    <div class="bg-pink-50 p-4 rounded-lg text-center"><div class="text-4xl">🐱</div><h3 class="font-bold mt-2">Preços Especiais</h3><p class="text-sm text-gray-600">Descontos imperdíveis</p></div>
+    <div class="bg-pink-50 p-4 rounded-lg text-center"><div class="text-4xl">❤️</div><h3 class="font-bold mt-2">Atendimento Amoroso</h3><p class="text-sm text-gray-600">Sempre com muito carinho</p></div>
+  </div>
+</div>
+
+<div id="produtos" class="hidden">
+  <h2 class="text-2xl font-bold mb-4">Produtos</h2>
+  <div class="bg-white p-4 rounded shadow mb-4">
+    <label for="pesquisaProduto" class="block text-sm font-semibold text-gray-700 mb-2">Pesquisar produto</label>
+    <input id="pesquisaProduto" type="search" placeholder="Digite nome, descrição ou categoria" class="border p-2 w-full rounded" oninput="filtrarProdutos()">
+  </div>
+  <div class="bg-white p-4 rounded shadow mb-4">
+    <input type="hidden" id="idProduto">
+    <input id="nomeProduto" placeholder="Nome *" class="border p-2 w-full mb-2 rounded">
+    <input id="descricaoProduto" placeholder="Descrição" class="border p-2 w-full mb-2 rounded">
+    <input id="precoProduto" type="number" step="0.01" placeholder="Preço *" class="border p-2 w-full mb-2 rounded">
+    <input id="precoDescontoProduto" type="number" step="0.01" placeholder="Preço desconto" class="border p-2 w-full mb-2 rounded">
+    <input id="imagemProduto" placeholder="URL da imagem (opcional)" class="border p-2 w-full mb-2 rounded" oninput="previewImagem()">
+    <img id="preview" class="w-32 h-32 object-cover rounded mb-2 hidden" alt="Preview"/>
+    <input id="estoqueProduto" type="number" placeholder="Estoque" class="border p-2 w-full mb-2 rounded">
+    <select id="categoriaProduto" class="border p-2 w-full mb-2 rounded"><option value="">Selecione uma categoria</option></select>
+    <button onclick="salvarProduto()" class="bg-heart text-white px-4 py-2 rounded hover:bg-red-600 transition">Salvar</button>
+  </div>
+  <div id="listaProdutos" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+</div>
+
+<div id="categorias" class="hidden">
+  <h2 class="text-2xl font-bold mb-4">Categorias</h2>
+  <div class="bg-white p-4 rounded shadow mb-4">
+    <input type="hidden" id="id" />
+    <input id="nome" placeholder="Nome *" class="border p-2 w-full mb-2" />
+    <input id="descricao" placeholder="Descrição" class="border p-2 w-full mb-2" />
+    <button onclick="salvarCategoria()" class="bg-heart text-white px-4 py-2 rounded hover:bg-red-600 transition">Salvar</button>
+  </div>
+  <div id="listaCategorias"></div>
+</div>
+</main>
+
+<script>
+const API_CAT = "http://localhost:8080/api/categorias";
+const API_PROD = "http://localhost:8080/api/produtos";
+let categoriasCache = [];
+let produtosCache = [];
+const DEFAULT_IMAGE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23FF4B4B'/%3E%3Ctext x='50' y='67' font-size='50' text-anchor='middle' fill='white'%3E🐾%3C/text%3E%3C/svg%3E";
+
+async function fetchAPI(url, options = {}) {
+  try {
+    const response = await fetch(url, options);
+    
+    if (!response.ok) {
+      let errorMessage = `Erro ${response.status}: ${response.statusText}`;
+      if (response.status === 403) errorMessage = "Erro 403: Acesso negado.";
+      else if (response.status === 404) errorMessage = "Erro 404: Endpoint não encontrado.";
+      else if (response.status === 500) errorMessage = "Erro 500: Erro interno no servidor.";
+      
+      const errorText = await response.text().catch(() => "");
+      if (errorText) console.error("Detalhe do erro:", errorText);
+      throw new Error(errorMessage);
+    }
+    
+    const text = await response.text();
+    if (!text || text.trim() === "") return null;
+    return JSON.parse(text);
+  } catch (error) {
+    console.error("Erro na requisição:", error);
+    throw error;
+  }
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('active');
+}
+
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('active');
+}
+
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSidebar(); });
+
+function abrirHome() {
+  document.getElementById('home').classList.remove("hidden");
+  document.getElementById('produtos').classList.add("hidden");
+  document.getElementById('categorias').classList.add("hidden");
+  history.replaceState(null, "", "pet.html#home");
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function abrirProdutos() {
+  document.getElementById('home').classList.add("hidden");
+  document.getElementById('produtos').classList.remove("hidden");
+  document.getElementById('categorias').classList.add("hidden");
+  history.replaceState(null, "", "pet.html#produtos");
+  listarProdutos();
+  carregarCategoriasSelect();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function abrirCategorias() {
+  document.getElementById('home').classList.add("hidden");
+  document.getElementById('produtos').classList.add("hidden");
+  document.getElementById('categorias').classList.remove("hidden");
+  history.replaceState(null, "", "pet.html#categorias");
+  listarCategorias();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function listarCategorias() {
+  const lista = document.getElementById('listaCategorias');
+  try {
+    lista.innerHTML = '<div class="loading">Carregando categorias...</div>';
+    const data = await fetchAPI(API_CAT);
+    categoriasCache = data || [];
+    lista.innerHTML = "";
+    if (!data || data.length === 0) {
+      lista.innerHTML = '<div class="no-data">📁 Nenhuma categoria cadastrada</div>';
+      return;
+    }
+    data.forEach(cat => {
+      lista.innerHTML += `<div class="bg-white p-3 mb-2 rounded shadow flex justify-between items-center">
+        <div><strong>${escapeHtml(cat.nome)}</strong><br><small>${escapeHtml(cat.descricao) || 'Sem descrição'}</small></div>
+        <div class="flex gap-2">
+          <button onclick="editarCategoria(${cat.id}, '${escapeHtml(cat.nome)}', '${escapeHtml(cat.descricao || '')}')" class="bg-blue-500 text-white px-3 py-1 rounded">Editar</button>
+          <button onclick="excluirCategoria(${cat.id})" class="bg-heart text-white px-3 py-1 rounded">Excluir</button>
+        </div>
+      </div>`;
+    });
+  } catch (error) {
+    lista.innerHTML = `<div class="error-message">❌ Erro: ${error.message}</div>`;
+  }
+}
+
+async function salvarCategoria() {
+  const nome = document.getElementById('nome');
+  const descricao = document.getElementById('descricao');
+  const id = document.getElementById('id');
+  
+  if (!nome.value) { alert("Preencha o nome!"); return; }
+  
+  const cat = { nome: nome.value, descricao: descricao.value || '', ativo: true };
+  try {
+    if (id.value) {
+      await fetchAPI(`${API_CAT}/${id.value}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(cat) });
+      alert("Categoria atualizada!");
+    } else {
+      await fetchAPI(API_CAT, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(cat) });
+      alert("Categoria salva!");
+    }
+    id.value = ""; nome.value = ""; descricao.value = "";
+    await listarCategorias();
+    await carregarCategoriasSelect();
+  } catch (error) {
+    alert("Erro: " + error.message);
+  }
+}
+
+function editarCategoria(i, n, d) {
+  document.getElementById('id').value = i;
+  document.getElementById('nome').value = n;
+  document.getElementById('descricao').value = d;
+}
+
+async function excluirCategoria(id) {
+  if (confirm("Excluir esta categoria?")) {
+    try {
+      await fetchAPI(`${API_CAT}/${id}`, { method: "DELETE" });
+      await listarCategorias();
+      await carregarCategoriasSelect();
+      alert("Categoria excluída!");
+    } catch (error) {
+      alert("Erro: " + error.message);
+    }
+  }
+}
+
+async function carregarCategoriasSelect() {
+  const select = document.getElementById('categoriaProduto');
+  try {
+    select.innerHTML = '<option value="">Carregando...</option>';
+    const data = await fetchAPI(API_CAT);
+    categoriasCache = data || [];
+    select.innerHTML = '<option value="">Selecione uma categoria</option>';
+    if (data && data.length > 0) {
+      data.forEach(cat => select.innerHTML += `<option value="${cat.id}">${escapeHtml(cat.nome)}</option>`);
+    } else {
+      select.innerHTML = '<option value="">Nenhuma categoria disponível</option>';
+    }
+  } catch (error) {
+    select.innerHTML = '<option value="">Erro ao carregar categorias</option>';
+  }
+}
+
+async function listarProdutos() {
+  const lista = document.getElementById('listaProdutos');
+  try {
+    lista.innerHTML = '<div class="loading">Carregando produtos...</div>';
+    const data = await fetchAPI(API_PROD);
+    produtosCache = data || [];
+    renderizarProdutos(produtosCache);
+    return;
+    lista.innerHTML = "";
+    if (!data || data.length === 0) {
+      lista.innerHTML = '<div class="no-data">🛍️ Nenhum produto cadastrado</div>';
+      return;
+    }
+    data.forEach(p => {
+      const produtoId = getProdutoId(p);
+      lista.innerHTML += `<div class="bg-white rounded-xl shadow-md p-4 border-l-4 border-heart">
+        <a href="produto.html?id=${encodeURIComponent(produtoId)}" class="block group" aria-label="Ver detalhes de ${escapeHtml(p.nome)}">
+          <img src="${getValidImageUrl(p.imagem)}" class="w-full h-40 object-cover rounded mb-2 transition group-hover:opacity-90" onerror="this.src='${DEFAULT_IMAGE}'">
+          <strong class="group-hover:text-heart transition">${escapeHtml(p.nome)}</strong>
+          <p class="text-gray-600 text-sm">${escapeHtml(p.descricao) || 'Sem descrição'}</p>
+        </a>
+        <p class="text-gray-500 line-through">R$ ${(p.preco || 0).toFixed(2)}</p>
+        <p class="text-heart font-bold">R$ ${(p.preco_desconto || p.preco || 0).toFixed(2)}</p>
+        <p class="text-gray-500 text-sm">Estoque: ${p.qtd_estoque || 0}</p>
+        <div class="flex gap-2 mt-2">
+          <a href="produto.html?id=${encodeURIComponent(produtoId)}" class="bg-green-600 text-white px-2 py-1 rounded flex-1 text-center">Detalhes</a>
+          <button onclick='editarProduto(${JSON.stringify({ id: produtoId, nome: p.nome, descricao: p.descricao, preco: p.preco, precoDesconto: p.preco_desconto, imagem: p.imagem, estoque: p.qtd_estoque, categoria: p.categoria?.id || "" })})' class="bg-blue-500 text-white px-2 py-1 rounded flex-1">Editar</button>
+          <button onclick="excluirProduto(${produtoId})" class="bg-heart text-white px-2 py-1 rounded flex-1">Excluir</button>
+        </div>
+      </div>`;
+    });
+  } catch (error) {
+    lista.innerHTML = `<div class="error-message">❌ Erro: ${error.message}</div>`;
+  }
+}
+
+function renderizarProdutos(produtos) {
+  const lista = document.getElementById('listaProdutos');
+  lista.innerHTML = "";
+
+  if (!produtos || produtos.length === 0) {
+    lista.innerHTML = '<div class="no-data">Nenhum produto encontrado</div>';
+    return;
+  }
+
+  produtos.forEach(p => {
+    const produtoId = getProdutoId(p);
+    lista.innerHTML += `<div class="bg-white rounded-xl shadow-md p-4 border-l-4 border-heart">
+      <a href="produto.html?id=${encodeURIComponent(produtoId)}" class="block group" aria-label="Ver detalhes de ${escapeHtml(p.nome)}">
+        <img src="${getValidImageUrl(p.imagem)}" class="w-full h-40 object-cover rounded mb-2 transition group-hover:opacity-90" onerror="this.src='${DEFAULT_IMAGE}'">
+        <strong class="group-hover:text-heart transition">${escapeHtml(p.nome)}</strong>
+        <p class="text-gray-600 text-sm">${escapeHtml(p.descricao) || 'Sem descrição'}</p>
+      </a>
+      <p class="text-gray-500 line-through">R$ ${(p.preco || 0).toFixed(2)}</p>
+      <p class="text-heart font-bold">R$ ${(p.preco_desconto || p.preco || 0).toFixed(2)}</p>
+      <p class="text-gray-500 text-sm">Estoque: ${p.qtd_estoque || 0}</p>
+      <div class="flex gap-2 mt-2">
+        <a href="produto.html?id=${encodeURIComponent(produtoId)}" class="bg-green-600 text-white px-2 py-1 rounded flex-1 text-center">Detalhes</a>
+        <button onclick='editarProduto(${JSON.stringify({ id: produtoId, nome: p.nome, descricao: p.descricao, preco: p.preco, precoDesconto: p.preco_desconto, imagem: p.imagem, estoque: p.qtd_estoque, categoria: p.categoria?.id || "" })})' class="bg-blue-500 text-white px-2 py-1 rounded flex-1">Editar</button>
+        <button onclick="excluirProduto(${produtoId})" class="bg-heart text-white px-2 py-1 rounded flex-1">Excluir</button>
+      </div>
+    </div>`;
+  });
+}
+
+function filtrarProdutos() {
+  const termo = normalizarTexto(document.getElementById('pesquisaProduto').value);
+
+  if (!termo) {
+    renderizarProdutos(produtosCache);
+    return;
+  }
+
+  const produtosFiltrados = produtosCache.filter(produto => {
+    const categoria = produto.categoria?.nome || produto.categoria?.descricao || '';
+    const textoProduto = normalizarTexto(`${produto.nome || ''} ${produto.descricao || ''} ${categoria}`);
+    return textoProduto.includes(termo);
+  });
+
+  renderizarProdutos(produtosFiltrados);
+}
+
+function editarProduto(p) {
+  document.getElementById('idProduto').value = p.id;
+  document.getElementById('nomeProduto').value = p.nome;
+  document.getElementById('descricaoProduto').value = p.descricao || '';
+  document.getElementById('precoProduto').value = p.preco;
+  document.getElementById('precoDescontoProduto').value = p.precoDesconto || 0;
+  document.getElementById('imagemProduto').value = p.imagem || '';
+  document.getElementById('estoqueProduto').value = p.estoque || 0;
+  document.getElementById('categoriaProduto').value = p.categoria || "";
+  previewImagem();
+  window.scrollTo({ top: 0 });
+}
+
+async function excluirProduto(id) {
+  if (confirm("Excluir este produto?")) {
+    try {
+      await fetchAPI(`${API_PROD}/${id}`, { method: "DELETE" });
+      await listarProdutos();
+      alert("Produto excluído!");
+    } catch (error) {
+      alert("Erro: " + error.message);
+    }
+  }
+}
+
+async function salvarProduto() {
+  const nome = document.getElementById('nomeProduto');
+  const preco = document.getElementById('precoProduto');
+  const categoriaId = document.getElementById('categoriaProduto');
+  const idProd = document.getElementById('idProduto');
+  
+  if (!nome.value) { alert("Preencha o nome!"); return; }
+  if (!preco.value) { alert("Preencha o preço!"); return; }
+  if (!categoriaId.value) { alert("Selecione uma categoria!"); return; }
+  
+  const categoriaCompleta = categoriasCache.find(c => c.id == categoriaId.value);
+  if (!categoriaCompleta) {
+    alert("Categoria não encontrada! Recarregue a página.");
+    return;
+  }
+  
+  const produto = {
+    nome: nome.value,
+    descricao: document.getElementById('descricaoProduto').value || '',
+    preco: parseFloat(preco.value),
+    preco_desconto: parseFloat(document.getElementById('precoDescontoProduto').value) || 0,
+    imagem: document.getElementById('imagemProduto').value || '',
+    qtd_estoque: parseInt(document.getElementById('estoqueProduto').value) || 0,
+    categoria: {
+      id: categoriaCompleta.id,
+      nome: categoriaCompleta.nome,
+      descricao: categoriaCompleta.descricao,
+      ativo: true
+    }
+  };
+  
+  try {
+    if (idProd.value) {
+      await fetchAPI(`${API_PROD}/${idProd.value}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(produto) });
+      alert("Produto atualizado!");
+    } else {
+      await fetchAPI(API_PROD, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(produto) });
+      alert("Produto salvo!");
+    }
+    limparProduto();
+    await listarProdutos();
+  } catch (error) {
+    alert("Erro: " + error.message);
+  }
+}
+
+function limparProduto() {
+  document.getElementById('idProduto').value = "";
+  document.getElementById('nomeProduto').value = "";
+  document.getElementById('descricaoProduto').value = "";
+  document.getElementById('precoProduto').value = "";
+  document.getElementById('precoDescontoProduto').value = "";
+  document.getElementById('imagemProduto').value = "";
+  document.getElementById('estoqueProduto').value = "";
+  document.getElementById('categoriaProduto').value = "";
+  document.getElementById('preview').classList.add("hidden");
+}
+
+function previewImagem() {
+  const url = document.getElementById('imagemProduto').value;
+  const preview = document.getElementById('preview');
+  if (url && url !== 'null' && url.trim() !== '') {
+    preview.src = url;
+    preview.classList.remove("hidden");
+    preview.onerror = () => { preview.src = DEFAULT_IMAGE; };
+  } else {
+    preview.classList.add("hidden");
+  }
+}
+
+function isValidImageUrl(url) { return url && url !== 'null' && url !== 'undefined' && url.trim() !== ''; }
+function getValidImageUrl(url) { return isValidImageUrl(url) ? url : DEFAULT_IMAGE; }
+function getProdutoId(produto) { return produto.idProdutos || produto.id || produto.idProduto || produto.id_produtos; }
+function normalizarTexto(texto) { return (texto || '').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim(); }
+function escapeHtml(text) { if(!text) return ''; const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
+
+function abrirSecaoInicial() {
+  if (window.location.hash === '#produtos') {
+    abrirProdutos();
+    return;
+  }
+
+  if (window.location.hash === '#categorias') {
+    abrirCategorias();
+    return;
+  }
+
+  abrirHome();
+}
+
+abrirSecaoInicial();
+
+window.addEventListener('load', () => {
+  fetch(API_CAT, { method: 'HEAD' }).catch(() => console.warn('⚠️ API não está acessível'));
+});
+</script>
+</body>
+</html>
