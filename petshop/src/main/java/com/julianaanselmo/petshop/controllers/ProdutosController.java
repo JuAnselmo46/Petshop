@@ -3,7 +3,6 @@ package com.julianaanselmo.petshop.controllers;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,12 +15,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.julianaanselmo.petshop.entities.Produtos;
 import com.julianaanselmo.petshop.services.ProdutosService;
 
-
 @RestController
 @RequestMapping("/api/produtos")
 public class ProdutosController {
 	
-	@Autowired
 	private final ProdutosService service;
 	
 	public ProdutosController(ProdutosService service) {
@@ -33,7 +30,7 @@ public class ProdutosController {
 		return service.findAll();
 	}
 	
-	@GetMapping ("/{id}")
+	@GetMapping("/{id}")
 	public Optional<Produtos> getById(@PathVariable Integer id) {
 		return service.findById(id);
 	}
@@ -52,5 +49,10 @@ public class ProdutosController {
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Integer id) {
         service.deleteById(id);
+    }
+    
+    @GetMapping("/categoria/{idCategoria}")
+    public List<Produtos> getProdutosByCategoria(@PathVariable Integer idCategoria) {
+        return service.getProdutosPorCategoria(idCategoria);
     }
 }

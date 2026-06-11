@@ -2,12 +2,9 @@ package com.julianaanselmo.petshop.services;
 
 import java.util.List;
 import java.util.Optional;
-
 import org.springframework.stereotype.Service;
-
 import com.julianaanselmo.petshop.entities.Produtos;
 import com.julianaanselmo.petshop.repositories.ProdutosRepository;
-
 
 @Service
 public class ProdutosService {
@@ -33,6 +30,9 @@ public class ProdutosService {
 	public void deleteById(Integer id) {
 		repository.deleteById(id);
 	}
-
-
+	
+	// Método corrigido chamando a variável 'repository' e retornando a lista
+	public List<Produtos> getProdutosPorCategoria(Integer id_categoria) {
+		return repository.findByCategoriaIdAndAtivoTrue(id_categoria);
+	}
 }
